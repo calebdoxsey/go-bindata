@@ -153,6 +153,22 @@ func writeTOC(w io.Writer, toc []Asset) error {
 	return writeTOCFooter(w)
 }
 
+func writeInfoTOC(w io.Writer, toc []Asset) error {
+	err := writeInfoTOCHeader(w)
+	if err != nil {
+		return err
+	}
+
+	for i := range toc {
+		err = writeInfoTOCAsset(w, &toc[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return writeTOCFooter(w)
+}
+
 // writeTOCHeader writes the table of contents file header.
 func writeTOCHeader(w io.Writer) error {
 	_, err := fmt.Fprintf(w, `// Asset loads and returns the asset for the given name.
@@ -181,9 +197,62 @@ var _bindata = map[string]func() ([]byte, error){
 	return err
 }
 
+func writeInfoTOCHeader(w io.Writer) error {
+	_, err := fmt.Fprintf(w, `// AssetInfo loads and returns the asset file info for the given name.
+// It returns an error if the asset could not be found or
+// could not be loaded
+func AssetInfo(name string) (os.FileInfo, error) {
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	if fi, ok := _bindata_info[cannonicalName]; ok {
+		return fi, nil
+	}
+	return nil, fmt.Errorf("Asset %%s not found", name)
+}
+
+type _bindata_file_info struct {
+	name string
+	size int64
+	mode os.FileMode
+	modTime time.Time
+}
+
+func (fi _bindata_file_info) Name() string {
+	return fi.name
+}
+func (fi _bindata_file_info) Size() int64 {
+	return fi.size
+}
+func (fi _bindata_file_info) Mode() os.FileMode {
+	return fi.mode
+}
+func (fi _bindata_file_info) ModTime() time.Time {
+	return fi.modTime
+}
+func (fi _bindata_file_info) IsDir() bool {
+	return false
+}
+func (fi _bindata_file_info) Sys() interface{} {
+	return nil
+}
+
+// _bindata_info is a table, holding each asset file info, mapped to its name
+var _bindata_info = map[string]os.FileInfo{
+`)
+	return err
+}
+
 // writeTOCAsset write a TOC entry for the given asset.
 func writeTOCAsset(w io.Writer, asset *Asset) error {
 	_, err := fmt.Fprintf(w, "\t%q: %s,\n", asset.Name, asset.Func)
+	return err
+}
+
+func writeInfoTOCAsset(w io.Writer, asset *Asset) error {
+	fi, err := os.Stat(asset.Path)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "\t%q: _bindata_file_info{%q, %d, os.FileMode(%d), time.Unix(%d,0)},\n", asset.Name, asset.Name, fi.Size(), uint32(fi.Mode()), fi.ModTime().Unix())
 	return err
 }
 

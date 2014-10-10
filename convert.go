@@ -79,6 +79,9 @@ func Translate(c *Config) error {
 	if err := writeTOC(bfd, toc); err != nil {
 		return err
 	}
+	if err := writeInfoTOC(bfd, toc); err != nil {
+		return err
+	}
 	// Write hierarchical tree of assets
 	return writeTOCTree(bfd, toc)
 }

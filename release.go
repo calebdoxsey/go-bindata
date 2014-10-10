@@ -81,6 +81,8 @@ func header_compressed_nomemcopy(w io.Writer) error {
 	"reflect"
 	"strings"
 	"unsafe"
+	"os"
+	"time"
 )
 
 func bindata_read(data, name string) ([]byte, error) {
@@ -119,6 +121,8 @@ func header_compressed_memcopy(w io.Writer) error {
 	"fmt"
 	"io"
 	"strings"
+	"os"
+	"time"
 )
 
 func bindata_read(data []byte, name string) ([]byte, error) {
@@ -148,6 +152,8 @@ func header_uncompressed_nomemcopy(w io.Writer) error {
 	"reflect"
 	"strings"
 	"unsafe"
+	"os"
+	"time"
 )
 
 func bindata_read(data, name string) ([]byte, error) {
@@ -169,6 +175,8 @@ func header_uncompressed_memcopy(w io.Writer) error {
 	_, err := fmt.Fprintf(w, `import (
 	"fmt"
 	"strings"
+	"os"
+	"time"
 )
 `)
 	return err
